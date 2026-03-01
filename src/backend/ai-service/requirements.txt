@@ -1,0 +1,32 @@
+{
+  "name": "@synapsemind/ai-service",
+  "version": "1.0.0",
+  "description": "SynapseMind AI Service",
+  "author": "SynapseMind Team",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "uvicorn main:app --host 0.0.0.0 --port 3004 --reload",
+    "start:prod": "gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker",
+    "lint": "ruff check .",
+    "format": "ruff format ."
+  },
+  "dependencies": {
+    "fastapi": "^0.109.0",
+    "uvicorn": "^0.27.0",
+    "pydantic": "^2.5.3",
+    "openai": "^1.8.0",
+    "langchain": "^0.1.4",
+    "langchain-openai": "^0.0.5",
+    "langchain-community": "^0.0.16",
+    "pinecone-client": "^2.2.4",
+    "python-dotenv": "^1.0.0",
+    "httpx": "^0.26.0",
+    "numpy": "^1.26.3"
+  },
+  "devDependencies": {
+    "ruff": "^0.1.9",
+    "pytest": "^7.4.4",
+    "pytest-asyncio": "^0.23.3"
+  }
+}

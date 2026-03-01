@@ -1,0 +1,118 @@
+.library-page {
+  max-width: 1200px;
+}
+
+.library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.library-header h1 {
+  font-size: 1.5rem;
+}
+
+.import-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.import-form input {
+  width: 300px;
+  padding: 0.625rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+}
+
+.import-form button {
+  padding: 0.625rem 1.25rem;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.document-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+
+.document-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.document-icon {
+  font-size: 1.5rem;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  color: var(--color-error);
+}
+
+.document-title {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.document-summary {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.document-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.document-meta span {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--color-background);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+}
+
+.document-meta .processed {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--color-success);
+}
+
+.empty-library {
+  text-align: center;
+  padding: 4rem;
+  color: var(--color-text-secondary);
+}

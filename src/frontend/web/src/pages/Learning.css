@@ -1,0 +1,149 @@
+.learning-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.learning-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.learning-header h1 {
+  font-size: 1.5rem;
+}
+
+.stats-row {
+  display: flex;
+  gap: 1.5rem;
+  color: var(--color-text-secondary);
+}
+
+.review-container {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+}
+
+.progress-bar {
+  height: 4px;
+  background: var(--color-background);
+  border-radius: 2px;
+  margin-bottom: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transition: width var(--transition-normal);
+}
+
+.card-count {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+}
+
+.flashcard {
+  text-align: center;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-concept {
+  font-size: 0.875rem;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.card-question {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+.card-answer {
+  padding: 1.5rem;
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+}
+
+.card-actions {
+  margin-top: 2rem;
+}
+
+.btn-show {
+  width: 100%;
+  padding: 1rem;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.review-buttons button {
+  padding: 0.875rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.review-buttons button:hover {
+  transform: scale(1.02);
+}
+
+.btn-again {
+  background: #DC2626;
+  color: white;
+}
+
+.btn-hard {
+  background: #F59E0B;
+  color: white;
+}
+
+.btn-good {
+  background: #10B981;
+  color: white;
+}
+
+.btn-easy {
+  background: #3B82F6;
+  color: white;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 4rem;
+}
+
+.celebration {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.no-reviews h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.no-reviews p {
+  color: var(--color-text-secondary);
+}
