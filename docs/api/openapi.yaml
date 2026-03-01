@@ -1,0 +1,1161 @@
+openapi: 3.0.3
+info:
+  title: SynapseMind API
+  description: |
+    API for SynapseMind - Intelligent Knowledge Management System with AI Tutor
+    
+    ## Authentication
+    Most endpoints require JWT authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <token>
+    ```
+    
+    ## GraphQL
+    The main API uses GraphQL. For complex queries, use the GraphQL endpoint at `/graphql`
+    
+    ## WebSocket
+    Real-time updates via WebSocket at `/ws`
+  version: 1.0.0
+  contact:
+    name: SynapseMind Team
+    email: api@synapsemind.io
+
+servers:
+  - url: https://api.synapsemind.io/v1
+    description: Production server
+  - url: https://staging-api.synapsemind.io/v1
+    description: Staging server
+  - url: http://localhost:4000/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ==================== Auth ====================
+  /auth/register:
+    post:
+      summary: Register new user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  minLength: 8
+                  example: securePassword123
+                name:
+                  type: string
+                  example: John Doe
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthPayload'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /auth/login:
+    post:
+      summary: Login user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthPayload'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthPayload'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ==================== Documents ====================
+  /documents:
+    get:
+      summary: Get user's documents
+      tags:
+        - Documents
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: source
+          in: query
+          schema:
+            $ref: '#/components/schemas/DocumentSource'
+      responses:
+        '200':
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Document'
+                  total:
+                    type: integer
+
+    post:
+      summary: Import a new document
+      tags:
+        - Documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportDocumentInput'
+      responses:
+        '202':
+          description: Document import started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+
+  /documents/{id}:
+    get:
+      summary: Get document by ID
+      tags:
+        - Documents
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Document details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete document
+      tags:
+        - Documents
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Document deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==================== Import ====================
+  /import/url:
+    post:
+      summary: Import document from URL
+      tags:
+        - Import
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  format: uri
+                type:
+                  $ref: '#/components/schemas/DocumentSource'
+      responses:
+        '202':
+          description: Import job started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportJob'
+
+  /import/file:
+    post:
+      summary: Upload file for import
+      tags:
+        - Import
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '202':
+          description: File uploaded, processing started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportJob'
+
+  /import/status/{jobId}:
+    get:
+      summary: Get import job status
+      tags:
+        - Import
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportJob'
+
+  # ==================== Knowledge Graph ====================
+  /graph:
+    get:
+      summary: Get user's knowledge graph
+      tags:
+        - Knowledge Graph
+      responses:
+        '200':
+          description: Knowledge graph data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeGraph'
+
+  /graph/export:
+    get:
+      summary: Export knowledge graph
+      tags:
+        - Knowledge Graph
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, csv, graphml]
+            default: json
+      responses:
+        '200':
+          description: Exported graph
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /concepts:
+    get:
+      summary: Search concepts
+      tags:
+        - Knowledge Graph
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Matching concepts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Concept'
+
+    post:
+      summary: Create new concept
+      tags:
+        - Knowledge Graph
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConceptInput'
+      responses:
+        '201':
+          description: Concept created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Concept'
+
+  /concepts/{id}:
+    get:
+      summary: Get concept details
+      tags:
+        - Knowledge Graph
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Concept details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Concept'
+
+  # ==================== Learning ====================
+  /learning/reviews:
+    get:
+      summary: Get review cards due for review
+      tags:
+        - Learning
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Review cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewCard'
+
+  /learning/reviews/{cardId}:
+    post:
+      summary: Complete a review
+      tags:
+        - Learning
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quality
+              properties:
+                quality:
+                  $ref: '#/components/schemas/ReviewQuality'
+                timeSpent:
+                  type: integer
+      responses:
+        '200':
+          description: Review completed, next card data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewCard'
+
+  /learning/stats:
+    get:
+      summary: Get learning statistics
+      tags:
+        - Learning
+      responses:
+        '200':
+          description: Learning stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningStats'
+
+  # ==================== AI ====================
+  /ai/chat:
+    post:
+      summary: Chat with Synapse AI
+      tags:
+        - AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                context:
+                  type: string
+      responses:
+        '200':
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SynapseResponse'
+
+  /ai/explain/{conceptId}:
+    post:
+      summary: Get AI explanation of a concept
+      tags:
+        - AI
+      parameters:
+        - name: conceptId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                context:
+                  type: string
+      responses:
+        '200':
+          description: AI explanation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SynapseResponse'
+
+  # ==================== User ====================
+  /user/profile:
+    get:
+      summary: Get current user profile
+      tags:
+        - User
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+    patch:
+      summary: Update user profile
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileInput'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /user/preferences:
+    get:
+      summary: Get user preferences
+      tags:
+        - User
+      responses:
+        '200':
+          description: User preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+
+    patch:
+      summary: Update user preferences
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePreferencesInput'
+      responses:
+        '200':
+          description: Preferences updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+
+  # ==================== Teams ====================
+  /teams:
+    get:
+      summary: Get user's teams
+      tags:
+        - Teams
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+
+    post:
+      summary: Create a new team
+      tags:
+        - Teams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Team created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /teams/{id}:
+    get:
+      summary: Get team details
+      tags:
+        - Teams
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Team details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /teams/{id}/members:
+    post:
+      summary: Invite member to team
+      tags:
+        - Teams
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - role
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  $ref: '#/components/schemas/TeamRole'
+      responses:
+        '201':
+          description: Member invited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMember'
+
+  # ==================== WebSocket ====================
+  /ws:
+    get:
+      summary: WebSocket connection
+      tags:
+        - WebSocket
+      responses:
+        '101':
+          description: Switching protocols
+
+# ==================== Components ====================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Auth
+    AuthPayload:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    # User
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        avatar:
+          type: string
+        profession:
+          $ref: '#/components/schemas/Profession'
+        subscription:
+          $ref: '#/components/schemas/Subscription'
+        createdAt:
+          type: string
+          format: date-time
+
+    Profession:
+      type: string
+      enum:
+        - DEVELOPER
+        - DESIGNER
+        - PRODUCT_MANAGER
+        - DATA_SCIENTIST
+        - RESEARCHER
+        - WRITER
+        - CONSULTANT
+        - STUDENT
+        - OTHER
+
+    Subscription:
+      type: object
+      properties:
+        plan:
+          $ref: '#/components/schemas/SubscriptionPlan'
+        expiresAt:
+          type: string
+          format: date-time
+
+    SubscriptionPlan:
+      type: string
+      enum:
+        - STARTER
+        - PRO
+        - TEAM
+        - ENTERPRISE
+
+    UserPreferences:
+      type: object
+      properties:
+        learningStyle:
+          $ref: '#/components/schemas/LearningStyle'
+        dailyTimeBudget:
+          type: integer
+        theme:
+          $ref: '#/components/schemas/Theme'
+        language:
+          type: string
+
+    LearningStyle:
+      type: string
+      enum:
+        - VISUAL
+        - AUDITORY
+        - KINESTHETIC
+        - MIXED
+
+    Theme:
+      type: string
+      enum:
+        - LIGHT
+        - DARK
+        - SYSTEM
+
+    # Documents
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        source:
+          $ref: '#/components/schemas/DocumentSource'
+        sourceUrl:
+          type: string
+        summary:
+          type: string
+        concepts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Concept'
+        metadata:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+
+    DocumentSource:
+      type: string
+      enum:
+        - WEB
+        - YOUTUBE
+        - PODCAST
+        - PDF
+        - EBOOK
+        - NOTION
+        - OBSIDIAN
+        - TWITTER
+        - KINDLE
+        - MANUAL
+
+    ImportDocumentInput:
+      type: object
+      properties:
+        url:
+          type: string
+        type:
+          $ref: '#/components/schemas/DocumentSource'
+
+    ImportJob:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/ImportStatus'
+        progress:
+          type: integer
+        documentId:
+          type: string
+          format: uuid
+
+    ImportStatus:
+      type: string
+      enum:
+        - PENDING
+        - PROCESSING
+        - COMPLETED
+        - FAILED
+
+    # Knowledge Graph
+    KnowledgeGraph:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Concept'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConceptConnection'
+        stats:
+          $ref: '#/components/schemas/GraphStats'
+
+    Concept:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        definition:
+          type: string
+        importance:
+          type: number
+        connections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConceptConnection'
+
+    ConceptConnection:
+      type: object
+      properties:
+        concept:
+          $ref: '#/components/schemas/Concept'
+        relationship:
+          $ref: '#/components/schemas/RelationshipType'
+        strength:
+          type: number
+
+    RelationshipType:
+      type: string
+      enum:
+        - RELATED_TO
+        - IS_A
+        - PART_OF
+        - DEPENDS_ON
+        - CONTRADICTS
+        - SUPPORTS
+        - EXAMPLE_OF
+
+    GraphStats:
+      type: object
+      properties:
+        totalNodes:
+          type: integer
+        totalEdges:
+          type: integer
+        density:
+          type: number
+
+    CreateConceptInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        definition:
+          type: string
+        notes:
+          type: string
+
+    # Learning
+    ReviewCard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        concept:
+          $ref: '#/components/schemas/Concept'
+        question:
+          type: string
+        answer:
+          type: string
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+        nextReview:
+          type: string
+          format: date-time
+        interval:
+          type: integer
+
+    Difficulty:
+      type: string
+      enum:
+        - EASY
+        - MEDIUM
+        - HARD
+
+    ReviewQuality:
+      type: integer
+      minimum: 0
+      maximum: 5
+
+    LearningStats:
+      type: object
+      properties:
+        streak:
+          type: integer
+        totalReviews:
+          type: integer
+        accuracy:
+          type: number
+        masteredConcepts:
+          type: integer
+        learningConcepts:
+          type: integer
+        newConcepts:
+          type: integer
+
+    # AI
+    SynapseResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+        concepts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Concept'
+
+    # Teams
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+
+    TeamMember:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        role:
+          $ref: '#/components/schemas/TeamRole'
+        expertise:
+          type: array
+          items:
+            type: string
+
+    TeamRole:
+      type: string
+      enum:
+        - OWNER
+        - ADMIN
+        - MEMBER
+        - VIEWER
+
+    # Inputs
+    RegisterInput:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        name:
+          type: string
+
+    LoginInput:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    UpdateProfileInput:
+      type: object
+      properties:
+        name:
+          type: string
+        avatar:
+          type: string
+        profession:
+          $ref: '#/components/schemas/Profession'
+
+    UpdatePreferencesInput:
+      type: object
+      properties:
+        learningStyle:
+          $ref: '#/components/schemas/LearningStyle'
+        dailyTimeBudget:
+          type: integer
+        theme:
+          $ref: '#/components/schemas/Theme'
+        language:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: object
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    PayloadTooLarge:
+      description: Payload too large
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    RateLimited:
+      description: Rate limited
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
