@@ -1,6 +1,6 @@
 # SynapseMind
 
-*SynapseMind – AI-powered knowledge management platform.*
+*AI-powered knowledge management platform that transforms passive content consumption into active knowledge building.*
 
 <p align="center">
   <img src="docs/assets/logo.svg" alt="SynapseMind Logo" width="200"/>
@@ -11,10 +11,18 @@
 </p>
 
 <p align="center">
-  <a href="https://synapsemind.io">Website</a> •
-  <a href="https://docs.synapsemind.io">Documentation</a> •
-  <a href="https://api.synapsemind.io">API</a> •
-  <a href="https://discord.gg/synapsemind">Discord</a>
+  <a href="https://github.com/OlehHavrilko/SynapseMind-">
+    <img src="https://img.shields.io/github/stars/OlehHavrilko/SynapseMind-" alt="Stars"/>
+  </a>
+  <a href="https://github.com/OlehHavrilko/SynapseMind-/actions">
+    <img src="https://img.shields.io/github/workflow/status/OlehHavrilko/SynapseMind-/CI" alt="Build"/>
+  </a>
+  <a href="https://github.com/OlehHavrilko/SynapseMind-/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/OlehHavrilko/SynapseMind-" alt="License"/>
+  </a>
+  <a href="https://discord.gg/synapsemind">
+    <img src="https://img.shields.io/discord/123456789" alt="Discord"/>
+  </a>
 </p>
 
 ---
@@ -81,8 +89,8 @@ SynapseMind transforms passive content consumption into active knowledge buildin
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/synapsemind/synapsemind.git
-cd synapsemind
+git clone https://github.com/OlehHavrilko/SynapseMind-.git
+cd SynapseMind-
 ```
 
 2. **Start infrastructure**
