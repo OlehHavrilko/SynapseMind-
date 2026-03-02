@@ -22,7 +22,7 @@ export class RedisService implements OnModuleInit {
   }
 
   async get(key: string): Promise<string | null> {
-    return (await this.client.get(key)) ?? '';
+    return ((await this.client.get(key)) as string) ?? '';
   }
 
   async set(key: string, value: string, ttl?: number): Promise<void> {
@@ -42,7 +42,7 @@ export class RedisService implements OnModuleInit {
   }
 
   async hGet(key: string, field: string): Promise<string | null> {
-    return (await this.client.hGet(key, field)) ?? '';
+    return ((await this.client.hGet(key, field)) as string) ?? '';
   }
 
   async hGetAll(key: string): Promise<Record<string, string>> {
