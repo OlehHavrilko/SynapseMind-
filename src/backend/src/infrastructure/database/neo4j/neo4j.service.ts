@@ -35,7 +35,7 @@ export class Neo4jService implements OnModuleInit, OnModuleDestroy {
     return this.driver.session();
   }
 
-  async runQuery<T = any>(query: string, parameters?: Record<string, any>): Promise<QueryResult<T>> {
+  async runQuery<T extends Record<string, any>>(query: string, parameters?: Record<string, any>): Promise<QueryResult<T>> {
     const session = this.driver.session();
     try {
       const result = await session.run(query, parameters);

@@ -2,7 +2,7 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GraphService } from '../graph/graph.service';
 import { DocumentsService } from '../documents/documents.service';
-import { SynapseResponse, AskSynapseInput, ExplainConceptInput, GeneratePracticeInput } from './dto/ai.input';
+import { SynapseResponse, AskSynapseInput, ExplainConceptInput, GeneratePracticeInput, ActionType } from './dto/ai.input';
 
 @Injectable()
 export class AiService {
@@ -47,7 +47,7 @@ export class AiService {
       suggestions: explanation.suggestions,
       concepts: [concept],
       actions: [
-        { type: 'START_REVIEW', payload: { conceptId: concept.id } },
+        { type: ActionType.START_REVIEW, payload: JSON.stringify({ conceptId: concept.id }) },
       ],
     };
   }

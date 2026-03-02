@@ -1,5 +1,5 @@
 import { ObjectType, Field, ID, InputType, registerEnumType } from '@nestjs/graphql';
-import { Concept } from '../graph/dto/graph.types';
+import { Concept } from '../../graph/dto/graph.types';
 
 export enum ActionType {
   SHOW_GRAPH = 'SHOW_GRAPH',

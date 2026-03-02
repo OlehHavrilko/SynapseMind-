@@ -57,5 +57,3 @@ export class LearningResolver {
     return this.learningService.generateCards(user.id, input);
   }
 }
-, input);
- 

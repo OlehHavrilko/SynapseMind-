@@ -1,0 +1,42 @@
+type User @table {
+  displayName: String!
+  email: String
+  photoUrl: String
+  createdAt: Timestamp!
+}
+
+type Content @table {
+  title: String!
+  contentType: String!
+  sourceUrl: String!
+  fullText: String
+  summaryGeneratedByAI: String
+  importDate: Timestamp
+  createdAt: Timestamp!
+  user: User
+}
+
+type Concept @table {
+  name: String!
+  description: String
+  type: String
+  createdAt: Timestamp!
+  user: User
+}
+
+type Relationship @table {
+  relationshipType: String!
+  description: String
+  createdAt: Timestamp!
+  sourceConcept: Concept!
+  targetConcept: Concept!
+  user: User
+}
+
+type Note @table {
+  text: String!
+  createdAt: Timestamp!
+  user: User
+  content: Content
+  concept: Concept
+}

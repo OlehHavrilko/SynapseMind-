@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Neo4jService } from '../../infrastructure/database/neo4j/neo4j.service';
-import { KnowledgeGraph, Concept, ConceptConnection, GraphStats } from './dto/graph.types';
+import { KnowledgeGraph, Concept, ConceptConnection, GraphStats, RelationshipType } from './dto/graph.types';
 
 @Injectable()
 export class GraphService {
@@ -128,7 +128,7 @@ export class GraphService {
       id: result.records[0].get('r').identity,
       source: fromId,
       target: toId,
-      relationship,
+      relationship: relationship as RelationshipType,
       strength: 1.0,
     };
   }
